@@ -1,10 +1,10 @@
 <img width="1774" height="887" alt="rrlogoc" src="https://github.com/user-attachments/assets/6b797545-b1bb-411d-ba95-8ee0d9bbcf0c" />
-Live Demo → resumeroaster-in.vercel.app
 
-
- **Upload your resume. Get roasted. Get hired.**
-
- Resume Roast is an AI-powered resume review platform that reads your resume like a cynical recruiter with 87 open tabs. No corporate fluff, no sugarcoating—just brutal, constructive sarcasm and direct bullet-by-bullet rewrites to make your resume stand out in the ATS pile.
+> **Upload your resume. Get roasted. Get hired.**
+> 
+> 🌐 **Live Website:** [resumeroaster-in.vercel.app](https://resumeroaster-in.vercel.app)
+> 
+> Resume Roast is an AI-powered resume review platform that reads your resume like a cynical recruiter with 87 open tabs. No corporate fluff, no sugarcoating—just brutal, constructive sarcasm and direct bullet-by-bullet rewrites to make your resume stand out in the ATS pile.
 
 ---
 
