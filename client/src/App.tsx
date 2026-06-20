@@ -5,6 +5,7 @@ import { ResultsView } from './components/ResultsView';
 import { AuthView } from './components/AuthView';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AlertCircle, LogOut, History } from 'lucide-react';
+import { HistoryModal } from './components/HistoryModal';
 
 type Step = 'idle' | 'loading' | 'results';
 
@@ -64,6 +65,7 @@ function AppInner() {
   const [step, setStep] = useState<Step>('idle');
   const [roastData, setRoastData] = useState<RoastResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -131,7 +133,7 @@ function AppInner() {
             <button
               id="history-btn"
               title="Roast History"
-              onClick={() => window.open(`${API}/api/user/history`, '_blank')}
+              onClick={() => setIsHistoryOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-200 text-xs font-bold text-secondary hover:text-primary hover:border-neutral-300 hover:bg-neutral-50 transition-all"
             >
               <History className="w-3.5 h-3.5" /> History
@@ -174,6 +176,9 @@ function AppInner() {
           <p>© {new Date().getFullYear()} Resume Roast. Roasted, not broken. Let's fix it.</p>
         </div>
       </footer>
+
+      {/* History Modal */}
+      <HistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
     </div>
   );
 }
