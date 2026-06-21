@@ -616,6 +616,8 @@ app.get('/api/user/history', async (req: express.Request, res: express.Response)
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to fetch history.' });
   }
+});
+
 // Diagnostic DB check endpoint
 app.get('/api/test-db', async (_req: express.Request, res: express.Response) => {
   const diagnosticResults: any = {
