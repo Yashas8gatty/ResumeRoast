@@ -616,6 +616,66 @@ app.get('/api/user/history', async (req: express.Request, res: express.Response)
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to fetch history.' });
   }
+// Diagnostic DB check endpoint
+app.get('/api/test-db', async (_req: express.Request, res: express.Response) => {
+  const diagnosticResults: any = {
+    supabase_url: process.env.SUPABASE_URL ? 'Configured' : 'Missing',
+    supabase_service_key: process.env.SUPABASE_SERVICE_KEY ? 'Configured' : 'Missing',
+    database_table_check: null,
+    storage_bucket_check: null
+  };
+
+  try {
+    // 1. Test "roasts" table access
+    const { data: dbData, error: dbError } = await supabaseAdmin
+      .from('roasts')
+      .select('id')
+      .limit(1);
+
+    if (dbError) {
+      diagnosticResults.database_table_check = {
+        status: 'Error',
+        message: dbError.message,
+        hint: 'Ensure you ran the SQL script to create the public.roasts table in the Supabase SQL editor.'
+      };
+    } else {
+      diagnosticResults.database_table_check = {
+        status: 'Success',
+        message: 'Successfully queried public.roasts table.'
+      };
+    }
+
+    // 2. Test "resumes" bucket access
+    const { data: buckets, error: storageError } = await supabaseAdmin
+      .storage
+      .listBuckets();
+
+    if (storageError) {
+      diagnosticResults.storage_bucket_check = {
+        status: 'Error',
+        message: storageError.message,
+        hint: 'Ensure your Supabase service role key is correct and Storage service is enabled.'
+      };
+    } else {
+      const resumeBucketExists = buckets?.some(b => b.name === 'resumes');
+      if (resumeBucketExists) {
+        diagnosticResults.storage_bucket_check = {
+          status: 'Success',
+          message: 'Found resumes storage bucket.'
+        };
+      } else {
+        diagnosticResults.storage_bucket_check = {
+          status: 'Error',
+          message: 'resumes bucket not found.',
+          hint: 'Go to Supabase -> Storage -> New Bucket, and create a public bucket named exactly: resumes'
+        };
+      }
+    }
+
+    res.status(200).json(diagnosticResults);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Diagnostic failed.' });
+  }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
