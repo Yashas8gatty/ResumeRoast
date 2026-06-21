@@ -258,12 +258,25 @@ function generateHeuristicRoast(resumeText: string): RoastResponse {
 }
 
 const getApiKeys = (): string[] => {
+  const keys: string[] = [];
+  
   const keysStr = process.env.GEMINI_API_KEYS || '';
   if (keysStr.trim()) {
-    return keysStr.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    keysStr.split(',').forEach(k => {
+      const trimmed = k.trim();
+      if (trimmed && !keys.includes(trimmed)) {
+        keys.push(trimmed);
+      }
+    });
   }
+
   const singleKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY || '';
-  return singleKey.trim() && !singleKey.includes('your_') ? [singleKey.trim()] : [];
+  const trimmedSingle = singleKey.trim();
+  if (trimmedSingle && !trimmedSingle.includes('your_') && !keys.includes(trimmedSingle)) {
+    keys.push(trimmedSingle);
+  }
+  
+  return keys;
 };
 
 async function callGeminiWithRotation(
