@@ -60,6 +60,67 @@ interface RoastResponse {
   resumeText?: string;
 }
 
+const MOCK_DEMO_RESPONSE: RoastResponse = {
+  score: 42,
+  firstImpression: {
+    critique: "This looks like a recipe book for generic React projects rather than a software engineer's resume.",
+    severity: "error"
+  },
+  experience: {
+    critique: "Passive verbs dominate. You assisted and helped, but did you actually build anything that made money?",
+    items: [
+      {
+        original: "Responsible for writing unit tests in Jest for various frontend components.",
+        improved: "Engineered robust Jest testing suite covering 94% of core business features, reducing production regressions by 32%.",
+        explanation: "Quantify test coverage and highlight regression prevention instead of just stating a passive duty."
+      },
+      {
+        original: "Assisted the team in migrating the codebase from Javascript to Typescript.",
+        improved: "Led migration of 45,000 LOC codebase to TypeScript, eliminating 80% of runtime type exceptions.",
+        explanation: "Show leadership and absolute outcome metrics rather than passive assistance."
+      }
+    ]
+  },
+  projects: {
+    critique: "No metrics or scale mentioned. A to-do list app in 2026 is an automatic rejection.",
+    items: [
+      {
+        original: "Built a weather dashboard website using React and OpenWeatherMap API.",
+        improved: "Designed and scaled React weather service serving 4,000+ monthly active users with 180ms response times.",
+        explanation: "Provide user counts, response times, and scale metrics to demonstrate real utility."
+      }
+    ]
+  },
+  skills: {
+    critique: "Too many generic office tools like MS Word. Highlight core stacks and frameworks.",
+    items: [
+      { name: "React", rating: 4, comment: "Decent application usage." },
+      { name: "Node.js", rating: 3, comment: "Understands basics but lacks system design metrics." },
+      { name: "Microsoft Word", rating: 1, comment: "Delete this immediately. It is not 1999." }
+    ]
+  },
+  atsCompatibility: {
+    critique: "Your two-column tables are likely to confuse standard ATS parsers.",
+    rating: 2,
+    issues: ["Avoid multiple columns", "Remove text tables", "Replace custom geometric symbols"]
+  },
+  whatRecruitersThink: {
+    critique: "A junior dev who hopes their tools do the thinking for them.",
+    quote: "If I wanted a Todo list developer, I'd write a script myself."
+  },
+  topFixes: [
+    "Remove basic tools like Microsoft Word and PowerPoint.",
+    "Add quantitative metrics to all work bullets.",
+    "Restructure experience layout into a single-column parser-friendly layout."
+  ],
+  improvedSummary: {
+    original: "Aspiring software engineer looking for a challenging role in an organization to utilize my skills.",
+    improved: "Metrics-driven Frontend Engineer with 2+ years of experience building and scaling high-performance React web apps.",
+    explanation: "Ditch the generic career aspiration. State what you are and what value you immediately bring."
+  },
+  resumeText: "Dummy resume text for demo purposes."
+};
+
 // ─── Inner app (has access to AuthContext) ───────────────────────────────────
 function AppInner() {
   const { user, token, logout, isLoading } = useAuth();
@@ -115,6 +176,11 @@ function AppInner() {
     setStep('idle');
     setRoastData(null);
     setError(null);
+  };
+
+  const handleLoadDemo = () => {
+    setRoastData(MOCK_DEMO_RESPONSE);
+    setStep('results');
   };
 
   return (
@@ -212,7 +278,12 @@ function AppInner() {
           </div>
         )}
 
-        {step === 'idle' && <LandingView onFileUpload={handleFileUpload} />}
+        {step === 'idle' && (
+          <LandingView 
+            onFileUpload={handleFileUpload} 
+            onLoadDemo={handleLoadDemo} 
+          />
+        )}
         {step === 'loading' && <LoadingView />}
         {step === 'results' && roastData && (
           <ResultsView data={roastData} onResumeUpload={handleReset} />

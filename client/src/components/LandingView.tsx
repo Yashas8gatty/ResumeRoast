@@ -4,9 +4,10 @@ import { useIsMobile } from '../hooks/useIsMobile';
 
 interface LandingViewProps {
   onFileUpload: (file: File) => void;
+  onLoadDemo?: () => void;
 }
 
-export const LandingView: React.FC<LandingViewProps> = ({ onFileUpload }) => {
+export const LandingView: React.FC<LandingViewProps> = ({ onFileUpload, onLoadDemo }) => {
   const isMobile = useIsMobile();
   const [isDragActive, setIsDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +117,19 @@ export const LandingView: React.FC<LandingViewProps> = ({ onFileUpload }) => {
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span className="font-semibold text-left">{error}</span>
             </div>
+          )}
+
+          {/* Demo Mode Button */}
+          {onLoadDemo && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onLoadDemo();
+              }}
+              className="mt-3 w-full h-12 bg-neutral-900 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-subtle border border-neutral-900 flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
+            >
+              ⚡ View Demo Roast (No Upload)
+            </button>
           )}
         </div>
 
@@ -227,6 +241,19 @@ export const LandingView: React.FC<LandingViewProps> = ({ onFileUpload }) => {
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span>{error}</span>
             </div>
+          )}
+
+          {/* Demo Mode Button */}
+          {onLoadDemo && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onLoadDemo();
+              }}
+              className="mt-4 w-full h-11 bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs uppercase tracking-wider rounded-medium shadow-subtle border border-neutral-900 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+            >
+              ⚡ View Demo Roast (No Upload)
+            </button>
           )}
         </div>
 
