@@ -184,7 +184,7 @@ function AppInner() {
   };
 
   return (
-    <div className={`${step === 'idle' ? 'h-screen' : 'min-h-screen'} bg-bg selection:bg-accent/10 selection:text-accent flex flex-col`}>
+    <div className="min-h-screen bg-bg selection:bg-accent/10 selection:text-accent flex flex-col">
 
       {/* Top Bar */}
       <header className="w-full border-b border-neutral-200/60 bg-white/70 backdrop-blur-sm sticky top-0 z-50 flex-shrink-0">
@@ -265,7 +265,7 @@ function AppInner() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow flex flex-col justify-center overflow-auto">
+      <main className="flex-grow flex flex-col justify-start sm:justify-center overflow-auto">
         {error && (
           <div className="max-w-xl mx-auto px-6 w-full">
             <div className="flex items-center gap-3 p-4 rounded-medium border border-error/20 bg-error/5 text-sm text-error mb-6">

@@ -59,7 +59,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onFileUpload, onLoadDe
   // 📱 Mobile-Only View
   if (isMobile) {
     return (
-      <div className="w-full flex-1 flex flex-col justify-center px-4 py-6 gap-6 bg-bg text-center">
+      <div className="w-full flex-1 flex flex-col justify-start pt-6 pb-8 px-4 gap-5 bg-bg text-center">
         {/* Hero Section */}
         <div className="space-y-3">
           {/* Brand Label */}
