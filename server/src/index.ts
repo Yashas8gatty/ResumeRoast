@@ -97,6 +97,149 @@ interface RoastResponse {
   resumeText?: string;
 }
 
+function generateHeuristicRoast(resumeText: string): RoastResponse {
+  const lines = resumeText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  
+  // 1. Extract potential skills
+  const commonSkills = [
+    'React', 'Angular', 'Vue', 'Next.js', 'TypeScript', 'JavaScript', 'Python', 'Java', 'C++', 'Rust', 'Go',
+    'HTML', 'CSS', 'Tailwind', 'SQL', 'PostgreSQL', 'MongoDB', 'MySQL', 'Redis', 'Docker', 'Kubernetes', 'AWS',
+    'GCP', 'Azure', 'Git', 'GitHub', 'CI/CD', 'Jenkins', 'Linux', 'Node.js', 'Express', 'Django', 'Flask',
+    'Spring Boot', 'Figma', 'Microsoft Word', 'Microsoft Excel', 'PowerPoint'
+  ];
+  const foundSkills = commonSkills.filter(skill => {
+    const regex = new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    return regex.test(resumeText);
+  });
+  
+  // Default fallback if no skills found
+  if (foundSkills.length === 0) {
+    foundSkills.push('Software Development', 'Git', 'Microsoft Word');
+  }
+
+  // 2. Extract potential bullets/experiences
+  const bullets = lines.filter(line => {
+    return /^[•\-\*\▪\+o]\s*/.test(line) || (line.length > 40 && line.length < 180 && !line.includes(':'));
+  }).map(line => line.replace(/^[•\-\*\▪\+o]\s*/, ''));
+
+  const expBullets: string[] = [];
+  const projBullets: string[] = [];
+  
+  bullets.forEach(b => {
+    const lower = b.toLowerCase();
+    if (lower.includes('project') || lower.includes('app') || lower.includes('system') || lower.includes('api') || lower.includes('clone') || lower.includes('build')) {
+      projBullets.push(b);
+    } else if (lower.includes('work') || lower.includes('led') || lower.includes('manage') || lower.includes('collaborate') || lower.includes('respons') || lower.includes('develop')) {
+      expBullets.push(b);
+    } else {
+      if (expBullets.length <= projBullets.length) {
+        expBullets.push(b);
+      } else {
+        projBullets.push(b);
+      }
+    }
+  });
+
+  const defaultExp = [
+    "Responsible for writing clean code and testing frontend features.",
+    "Worked with cross-functional teams to deliver software updates."
+  ];
+  const defaultProj = [
+    "Built a task manager application in React and Redux.",
+    "Developed a personal portfolio site to show coding projects."
+  ];
+
+  const finalExp = expBullets.length > 0 ? expBullets.slice(0, 3) : defaultExp;
+  const finalProj = projBullets.length > 0 ? projBullets.slice(0, 2) : defaultProj;
+
+  let originalSummary = "Passionate developer seeking opportunities to learn and grow in a fast-paced environment.";
+  for (const line of lines) {
+    if (line.length > 80 && line.length < 250 && !line.includes('•') && !line.includes('-') && !line.includes('*')) {
+      originalSummary = line;
+      break;
+    }
+  }
+
+  const getSkillComment = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes('word') || n.includes('excel') || n.includes('powerpoint')) {
+      return { rating: 1, comment: `${name} is not a tech skill. Listing this makes you look computer-illiterate.` };
+    }
+    if (n.includes('react') || n.includes('next') || n.includes('typescript') || n.includes('javascript')) {
+      return { rating: 3, comment: `Knowing basic ${name} syntax is cute, but do you know how rendering loops and state managers actually work?` };
+    }
+    if (n.includes('git') || n.includes('github')) {
+      return { rating: 3, comment: `You know how to push. Hopefully you don't commit direct to main.` };
+    }
+    return { rating: 3, comment: `Decent utility skill, but it's listed without any architectural context.` };
+  };
+
+  return {
+    score: Math.floor(Math.random() * 20) + 40,
+    firstImpression: {
+      critique: "A standard textbook layout. Looks like a chore list, not a highlight reel. Lacks measurable output.",
+      severity: "error"
+    },
+    experience: {
+      critique: "A list of duties with zero quantifiable business impact. Recruiters need outcomes, not chores.",
+      items: finalExp.map(item => {
+        const words = item.split(' ').slice(0, 5).join(' ');
+        return {
+          original: item,
+          improved: `Engineered and optimized core flows related to ${words}, leading to a 28% reduction in latency and saving 8 team-hours weekly.`,
+          explanation: "Coding tasks are generic fluff. Tell us the actual outcome and time saved."
+        };
+      })
+    },
+    projects: {
+      critique: "Standard tutorial projects. Build real-world high-throughput applications to get noticed.",
+      items: finalProj.map(item => {
+        const words = item.split(' ').slice(0, 5).join(' ');
+        return {
+          original: item,
+          improved: `Designed and deployed a highly scalable architecture for ${words}, supporting 2,000+ daily active users.`,
+          explanation: "If a junior dev can copy this from a YouTube tutorial, it's not a differentiator."
+        };
+      })
+    },
+    skills: {
+      critique: "A dry dump of buzzwords. Try grouping them and removing basic desktop tools.",
+      items: foundSkills.slice(0, 4).map(skill => {
+        const commentData = getSkillComment(skill);
+        return {
+          name: skill,
+          rating: commentData.rating,
+          comment: commentData.comment
+        };
+      })
+    },
+    atsCompatibility: {
+      critique: "Unstructured tables, multi-column setups, and missing core keywords will confuse basic ATS parsers.",
+      rating: 64,
+      issues: [
+        "Unparseable grid columns or icons detected",
+        "No measurable success indicators in job achievements",
+        "Too many generic keywords diluting matching accuracy"
+      ]
+    },
+    whatRecruitersThink: {
+      critique: "Another carbon copy of 200 other applications today. Skimmed and filed under 'No'.",
+      quote: "No metrics, no interest. Next resume please."
+    },
+    topFixes: [
+      "Remove basic tools like Word and PowerPoint from your skills section.",
+      "Add quantifiable statistics (percentages, hours saved) to every job bullet.",
+      "Rewrite passive verbs ('responsible for', 'assisted') with active engineering decisions."
+    ],
+    improvedSummary: {
+      original: originalSummary,
+      improved: "Performance-focused developer specializing in building scalable software systems, optimizing workflows, and improving user retention.",
+      explanation: "Remove junior clichés like 'seeking learning opportunities'. Start with what you bring to the table immediately."
+    },
+    resumeText: resumeText
+  };
+}
+
 app.post('/api/roast', upload.single('resume'), async (req: express.Request, res: express.Response) => {
   try {
     if (!req.file) {
@@ -125,89 +268,7 @@ app.post('/api/roast', upload.single('resume'), async (req: express.Request, res
 
     if (isMock) {
       console.log('OpenAI API Key is missing or using default placeholder. Returning mock roast response.');
-      // Create a nice mock roast using content matches from the parsed text
-      const hasReact = /react\b/i.test(resumeText);
-      const hasNode = /node\b/i.test(resumeText);
-      const hasJava = /java\b/i.test(resumeText);
-      const hasPython = /python\b/i.test(resumeText);
-
-      const mockResponse: RoastResponse = {
-        score: 68,
-        firstImpression: {
-          critique: "Generic template. Reads like chores, not achievements. Zero wow factor.",
-          severity: "warning"
-        },
-        experience: {
-          critique: "Weak passive verbs. No metrics. Recruiters want outcomes, not daily duties.",
-          items: [
-            {
-              original: "Responsible for writing clean code and testing frontend features.",
-              improved: `Developed and unit-tested 15+ frontend features in ${hasReact ? 'React' : 'key stacks'}, decreasing bug reports in production by 18%.`,
-              explanation: "Coding is generic utility fluff. Everyone writes code—what did you actually deliver?"
-            },
-            {
-              original: "Helped team transition to modern deployment stack.",
-              improved: "Co-authored migration plan for transitioning 4 local services to cloud architecture, cutting deployment time by 40%.",
-              explanation: "Helped transition is weak passive phrasing. Sounds like you watched others do the real migration."
-            }
-          ]
-        },
-        projects: {
-          critique: "Tutorial clone projects. Instant recruiter eye-roll. Build real systems.",
-          items: [
-            {
-              original: "Built a weather forecast app in React that calls an external API.",
-              improved: "Engineered a weather dashboard featuring state caching, preventing 80% of redundant API calls.",
-              explanation: "Weather app is a generic tutorial clone. Immediate recruiter eye-roll."
-            }
-          ]
-        },
-        skills: {
-          critique: "Office tools dilute tech profile. Remove Microsoft Word immediately.",
-          items: [
-            {
-              name: hasReact ? "React" : (hasJava ? "Java" : (hasPython ? "Python" : "Programming")),
-              rating: 4,
-              comment: "Decent, but prove you built architectures."
-            },
-            {
-              name: "Git & Version Control",
-              rating: 3,
-              comment: "Standard tool. Hopefully you commit clean."
-            },
-            {
-              name: "Microsoft Word",
-              rating: 1,
-              comment: "Microsoft Word is not a tech skill. Listing this makes you look computer-illiterate."
-            }
-          ]
-        },
-        atsCompatibility: {
-          critique: "Clean layout, but critical keywords are missing. Fix now.",
-          rating: 78,
-          issues: [
-            "Missing keywords for continuous integration (CI/CD)",
-            "Unstructured contact fields (phone/email in non-standard location)"
-          ]
-        },
-        whatRecruitersThink: {
-          critique: "Generic buzzwords fail the 6-second scan.",
-          quote: "Another Udemy clone. Next resume please."
-        },
-        topFixes: [
-          "Remove basic office tools like Word and Excel from your tech skills section.",
-          "Quantify achievements. Add percentages, dollar values, or hour reductions to your work bullets.",
-          "Scrap generic descriptions and highlight actual architectural decisions or user impacts.",
-          "Remove fluff words like 'passionate self-starter' from your summary."
-        ],
-        improvedSummary: {
-          original: "Passionate developer looking to leverage my skills in a challenging role where I can grow and learn.",
-          improved: "Results-driven Software Engineer with experience developing and optimizing web applications. Specializes in building performant user interfaces, implementing efficient workflows, and resolving bottlenecks.",
-          explanation: "Passionate self-starter looking to learn is junior fluff. Recruiters pay for results, not your education."
-        },
-        resumeText: resumeText
-      };
-
+      const mockResponse = generateHeuristicRoast(resumeText);
       res.status(200).json(mockResponse);
       return;
     }
@@ -223,6 +284,14 @@ CRITICAL CRITIQUE RULES FOR EACH SECTION:
 2. Do NOT reference other resume sections, improvements, generated rewrites, hidden context, future sections, or assumptions.
 3. If the section does not mention something: DO NOT mention it. (e.g. Do NOT say "Your patent is strong" if a patent does not appear in the text).
 4. No invented achievements. No cross-section references.
+
+CRITICAL ORIGINAL TEXT RULES:
+- The "original" fields in "experience.items", "projects.items", and "improvedSummary" MUST be exact verbatim quotes (word-for-word copy) of real bullet points, job descriptions, project lines, or summaries actually present in the candidate's resume.
+- Never invent, summarize, or generalize any projects, work experiences, or skills.
+- If the candidate's resume does not have a projects section or any project descriptions, set "projects.items" to an empty array [].
+- If they do not have an experience section, set "experience.items" to an empty array [].
+- If they do not list any skills, set "skills.items" to an empty array [].
+- Never hallucinate fake companies, technologies, or job achievements. If it's not in the resume text, it does not exist.
 
 RECRUITER REACTION RULES:
 Write like a recruiter reviewing the section text. Use this scale:
@@ -314,78 +383,7 @@ Do not include any markdown backticks (\`\`\`json ... \`\`\`) in your response. 
       roastData = JSON.parse(responseText);
     } catch (apiErr: any) {
       console.warn('[ROAST] Gemini API call failed (likely Rate Limit 429). Falling back to mock roast. Error:', apiErr.message || apiErr);
-      
-      // Fallback structured roast so the app stays functional when rate-limited
-      roastData = {
-        score: 48,
-        firstImpression: {
-          critique: "A solid attempt, but ultimately reads like a standard corporate blueprint copy-pasted from the web.",
-          severity: 'error'
-        },
-        experience: {
-          critique: "Mostly generic descriptions of tasks. Needs more quantifiable business outcomes.",
-          items: [
-            {
-              original: "Responsible for developing web applications and maintaining legacy systems.",
-              improved: "Engineered 4 responsive web applications, reducing page load times by 40% and cutting maintenance tickets in half.",
-              explanation: "You need to focus on what you achieved, not just what was on your task list."
-            },
-            {
-              original: "Assisted the team in migrating software to cloud services.",
-              improved: "Co-led software migration to AWS Cloud, increasing system reliability to 99.99% for 5,000+ daily active users.",
-              explanation: "'Assisted' makes you sound like a passenger. Take credit for the cloud migration."
-            }
-          ]
-        },
-        projects: {
-          critique: "Looks like standard boot-camp tutorial projects. Make them solve real production-grade problems.",
-          items: [
-            {
-              original: "Created a task management app with React and Redux.",
-              improved: "Designed a real-time collaborative task planner handling concurrent updates from 200+ users via WebSockets.",
-              explanation: "If anyone can build it in an afternoon, it's not a standout project."
-            }
-          ]
-        },
-        skills: {
-          critique: "Just a generic dump of popular buzzwords. Be specific about what you excel at.",
-          items: [
-            {
-              name: "React",
-              rating: 3,
-              comment: "Fine for building views, but how well do you understand lifecycle optimization and rendering paths?"
-            },
-            {
-              name: "Node.js",
-              rating: 3,
-              comment: "Can you design asynchronous middlewares or do you just write basic REST controllers?"
-            }
-          ]
-        },
-        atsCompatibility: {
-          critique: "Your structure uses elements that can confuse basic ATS parsers.",
-          rating: 65,
-          issues: [
-            "Use of columns or tables that can break parsing",
-            "Lack of impact-focused action verbs",
-            "Generic summary section"
-          ]
-        },
-        whatRecruitersThink: {
-          critique: "They'll skim it for 6 seconds, find no numbers, and put it in the 'maybe later' folder.",
-          quote: "Needs a lot more metric-driven substance. Next applicant."
-        },
-        topFixes: [
-          "Rewrite passive phrases with metric-focused results",
-          "Ensure layout is clean and parseable by standard ATS systems",
-          "Highlight complex engineering challenges instead of generic tutorials"
-        ],
-        improvedSummary: {
-          original: "Motivated engineer seeking opportunities to learn and grow in a fast-paced environment.",
-          improved: "Performance-driven Software Engineer specialized in delivering scalable full-stack applications with measurable performance gains.",
-          explanation: "Never ask a company to help you 'learn and grow' in your summary; show them what you bring to the table immediately."
-        }
-      };
+      roastData = generateHeuristicRoast(resumeText);
     }
 
     roastData.resumeText = resumeText;
