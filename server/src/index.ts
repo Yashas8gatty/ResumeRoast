@@ -161,7 +161,7 @@ function calculateDynamicScore(resumeText: string, bullets: string[], foundSkill
 
 function generateHeuristicRoast(resumeText: string): RoastResponse {
   const lines = resumeText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  
+
   // 1. Extract potential skills
   const commonSkills = [
     'React', 'Angular', 'Vue', 'Next.js', 'TypeScript', 'JavaScript', 'Python', 'Java', 'C++', 'Rust', 'Go',
@@ -173,7 +173,7 @@ function generateHeuristicRoast(resumeText: string): RoastResponse {
     const regex = new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
     return regex.test(resumeText);
   });
-  
+
   // Default fallback if no skills found
   if (foundSkills.length === 0) {
     foundSkills.push('Software Development', 'Git', 'Microsoft Word');
@@ -187,7 +187,7 @@ function generateHeuristicRoast(resumeText: string): RoastResponse {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const lower = line.toLowerCase();
-    
+
     if (lower.includes('experience') || lower.includes('work history') || lower.includes('employment') || lower.includes('professional background')) {
       currentSection = 'experience';
       continue;
@@ -201,10 +201,10 @@ function generateHeuristicRoast(resumeText: string): RoastResponse {
       currentSection = 'education';
       continue;
     }
-    
+
     const isBullet = /^[•\-\*\▪\+o]\s*/.test(line);
     const cleanLine = line.replace(/^[•\-\*\▪\+o]\s*/, '').trim();
-    
+
     if (currentSection === 'projects') {
       if (isBullet) {
         if (projectsList.length > 0) {
@@ -243,7 +243,7 @@ function generateHeuristicRoast(resumeText: string): RoastResponse {
 
   const fallbackExp: string[] = [];
   const fallbackProj: string[] = [];
-  
+
   bullets.forEach(b => {
     const lower = b.toLowerCase();
     if (lower.includes('project') || lower.includes('app') || lower.includes('system') || lower.includes('api') || lower.includes('clone') || lower.includes('build')) {
@@ -259,12 +259,12 @@ function generateHeuristicRoast(resumeText: string): RoastResponse {
     }
   });
 
-  const finalExp = validExperiences.length > 0 
-    ? validExperiences.slice(0, 8) 
+  const finalExp = validExperiences.length > 0
+    ? validExperiences.slice(0, 8)
     : (fallbackExp.length > 0 ? fallbackExp.slice(0, 8).map(b => ({ title: 'Work Experience Bullet', bullets: [b] })) : null);
 
-  const finalProj = validProjects.length > 0 
-    ? validProjects.slice(0, 8) 
+  const finalProj = validProjects.length > 0
+    ? validProjects.slice(0, 8)
     : (fallbackProj.length > 0 ? fallbackProj.slice(0, 8).map(b => ({ title: 'Project Bullet', bullets: [b] })) : null);
 
   const defaultExp = [
@@ -371,7 +371,7 @@ function generateHeuristicRoast(resumeText: string): RoastResponse {
 
 const getApiKeys = (): string[] => {
   const keys: string[] = [];
-  
+
   const keysStr = process.env.GEMINI_API_KEYS || '';
   if (keysStr.trim()) {
     keysStr.split(',').forEach(k => {
@@ -387,7 +387,7 @@ const getApiKeys = (): string[] => {
   if (trimmedSingle && !trimmedSingle.includes('your_') && !keys.includes(trimmedSingle)) {
     keys.push(trimmedSingle);
   }
-  
+
   return keys;
 };
 
@@ -422,7 +422,8 @@ async function callGeminiWithRotation(
       const options: any = {
         model: 'gemini-2.5-flash',
         messages: messages,
-        temperature: 1.0
+        temperature: 1.2
+
       };
 
       if (responseFormatJson) {
@@ -448,8 +449,8 @@ async function callGeminiWithRotation(
 app.post('/api/roast', upload.single('resume'), async (req: express.Request, res: express.Response) => {
   try {
     if (!req.file) {
-       res.status(400).json({ error: 'Please upload a PDF resume.' });
-       return;
+      res.status(400).json({ error: 'Please upload a PDF resume.' });
+      return;
     }
 
     const keys = getApiKeys();
@@ -620,7 +621,7 @@ Do not include any markdown backticks (\`\`\`json ... \`\`\`) in your response. 
             console.error('DB insert error:', dbError.message);
           } else {
             console.log('[ROAST] Saved to DB for user:', user.id, '| score:', roastData.score);
-            
+
             // Send Discord Webhook Notification
             const userName = user.user_metadata?.name || 'Unknown User';
             const userEmail = user.email || 'unknown@email.com';
@@ -640,7 +641,7 @@ Do not include any markdown backticks (\`\`\`json ... \`\`\`) in your response. 
 
   } catch (error: any) {
     console.error('Error roasting resume:', error);
-     res.status(500).json({ error: error.message || 'An error occurred during the roast process.' });
+    res.status(500).json({ error: error.message || 'An error occurred during the roast process.' });
   }
 });
 
@@ -648,7 +649,7 @@ Do not include any markdown backticks (\`\`\`json ... \`\`\`) in your response. 
 app.post('/api/chat', async (req: express.Request, res: express.Response) => {
   try {
     const { messages, resumeText, roastData } = req.body;
-    
+
     if (!messages || !Array.isArray(messages)) {
       res.status(400).json({ error: 'Invalid messages array.' });
       return;
@@ -666,7 +667,7 @@ app.post('/api/chat', async (req: express.Request, res: express.Response) => {
         "Let's be real: no recruiter is reading past your first job bullet if it starts with 'responsible for'. Rewrite it using active verbs."
       ];
       const randomReply = mockReplies[Math.floor(Math.random() * mockReplies.length)];
-      
+
       await new Promise(resolve => setTimeout(resolve, 800));
       res.status(200).json({ content: randomReply });
       return;
@@ -759,7 +760,7 @@ app.post('/api/auth/signup', async (req: express.Request, res: express.Response)
     }
 
     console.log('[SIGNUP] Success — user created and signed in:', data.user.id);
-    
+
     // Send Discord Webhook Notification on signup
     await sendDiscordNotification(`🎉 **New User Signed Up!**\n👤 Name: **${name}**\n📧 Email: **${email}**`);
 
