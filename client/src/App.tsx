@@ -62,7 +62,7 @@ interface RoastResponse {
 }
 
 const MOCK_DEMO_RESPONSE: RoastResponse = {
-  isMock: true,
+  isMock: false,
   score: 42,
   firstImpression: {
     critique: "This looks like a recipe book for generic React projects rather than a software engineer's resume.",

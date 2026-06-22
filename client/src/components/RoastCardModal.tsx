@@ -8,6 +8,7 @@ interface RoastCardModalProps {
   quote: string;
   mood: string;
   fixes: string[];
+  userName: string;
 }
 
 export const RoastCardModal: React.FC<RoastCardModalProps> = ({
@@ -17,6 +18,7 @@ export const RoastCardModal: React.FC<RoastCardModalProps> = ({
   quote,
   mood,
   fixes,
+  userName,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -29,7 +31,7 @@ export const RoastCardModal: React.FC<RoastCardModalProps> = ({
     }, 80);
 
     return () => clearTimeout(timer);
-  }, [isOpen, score, quote, mood, fixes]);
+  }, [isOpen, score, quote, mood, fixes, userName]);
 
   const drawCard = () => {
     const canvas = canvasRef.current;
@@ -74,6 +76,15 @@ export const RoastCardModal: React.FC<RoastCardModalProps> = ({
     ctx.font = 'bold 13px "Inter", sans-serif';
     ctx.fillStyle = '#C66A3D'; // Accent color
     ctx.fillText('OFFICIAL REJECTION DOSSIER & FLUX REPORT', 60, 115);
+
+    // Candidate Name (Middle Top)
+    ctx.font = 'bold 12px "Inter", sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillText('CANDIDATE RECIPIENT:', 400, 65);
+
+    ctx.font = '900 18px "Geist", "Inter", sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(userName.toUpperCase(), 400, 88);
 
     // Score Circle (Left Side)
     const circleX = 220;

@@ -4,10 +4,11 @@ import {
   ChevronDown, ChevronUp, CheckCircle2,
   Sparkles, Eye, Briefcase, FolderGit2, Cpu, Award,
   Trash2, PlusCircle, Edit3, ArrowRight, CornerDownRight,
-  Download
+  Download, Star
 } from 'lucide-react';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { RoastCardModal } from './RoastCardModal';
+import { useAuth } from '../context/AuthContext';
 
 interface RoastResponse {
   score: number;
@@ -127,11 +128,49 @@ const CollapsibleText: React.FC<{ text: string; maxLength?: number }> = ({ text,
 };
 
 export const ResultsView: React.FC<ResultsViewProps> = ({ data, onResumeUpload }) => {
+  const { user } = useAuth();
   const fixWorkshopRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'heatmap' | 'debate'>('overview');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [showMockModal, setShowMockModal] = useState(!!data.isMock);
   const [activeSection, setActiveSection] = useState<string>('Summary');
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState<number>(5);
+  const [feedbackComment, setFeedbackComment] = useState('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
+  const handleExitClick = () => {
+    setShowFeedbackModal(true);
+  };
+
+  const handleCloseFeedback = () => {
+    setShowFeedbackModal(false);
+    onResumeUpload();
+  };
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingFeedback(true);
+    try {
+      await fetch(`${API}/api/feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rating: feedbackRating,
+          comment: feedbackComment,
+          email: user?.email || 'anonymous@user.com',
+          name: user?.name || 'Anonymous User',
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to submit feedback:', err);
+    } finally {
+      setIsSubmittingFeedback(false);
+      handleCloseFeedback();
+    }
+  };
   const sectionsList = ['Summary', 'Skills', 'Projects', 'Experience', 'Achievements', 'Verdict'];
 
   const renderReactionBadge = (severity: 'SEVERE' | 'MODERATE' | 'PRAISE') => {
@@ -478,7 +517,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ data, onResumeUpload }
               Certificate
             </button>
             <button
-              onClick={onResumeUpload}
+              onClick={handleExitClick}
               className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-primary hover:text-accent transition-all border border-neutral-900 bg-white rounded-xl shadow-subtle cursor-pointer active:scale-[0.98]"
             >
               New Victim →
@@ -1428,7 +1467,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ data, onResumeUpload }
             Roast Certificate
           </button>
           <button
-            onClick={onResumeUpload}
+            onClick={handleExitClick}
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-primary hover:text-accent transition-all border border-neutral-900 hover:border-neutral-900 bg-white rounded-medium shadow-subtle cursor-pointer"
           >
             New Victim →
@@ -2554,6 +2593,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ data, onResumeUpload }
         quote={data.whatRecruitersThink.quote}
         mood={getScoreVerdict(data.score).mood}
         fixes={data.topFixes}
+        userName={user?.name || 'Anonymous'}
       />
 
       {showMockModal && (
@@ -2579,6 +2619,83 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ data, onResumeUpload }
             >
               Proceed to Roast
             </button>
+          </div>
+        </div>
+      )}
+
+      {showFeedbackModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-[#111111] border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-neutral-800 bg-[#151515] flex items-center justify-between">
+              <div className="text-left">
+                <h3 className="text-md font-black text-white uppercase tracking-tight">Rate Your Experience</h3>
+                <p className="text-[11px] text-neutral-400">Did the roast cause permanent emotional damage?</p>
+              </div>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleFeedbackSubmit} className="p-6 space-y-5">
+              {/* Star Rating select */}
+              <div className="space-y-2 text-left">
+                <span className="text-xs font-bold text-neutral-400 block">Rating:</span>
+                <div className="flex items-center justify-center gap-3 py-3 bg-neutral-900/60 rounded-xl border border-neutral-800/80">
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const ratingLabels = ['Soft 😐', 'Mild 🙄', 'Painful 😭', 'Severe 💀', 'Brutal 🔥'];
+                    const isSelected = feedbackRating >= star;
+                    return (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFeedbackRating(star)}
+                        className="group flex flex-col items-center gap-1 focus:outline-none cursor-pointer min-w-[50px]"
+                      >
+                        <Star
+                          className={`w-6 h-6 transition-all ${
+                            isSelected ? 'fill-accent text-accent scale-110' : 'text-neutral-600 group-hover:text-neutral-400'
+                          }`}
+                        />
+                        {feedbackRating === star && (
+                          <span className="text-[8px] font-black uppercase text-accent tracking-wider animate-in fade-in zoom-in-50 duration-200 block text-center">
+                            {ratingLabels[star - 1]}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Comment text area */}
+              <div className="space-y-1.5 text-left">
+                <span className="text-xs font-bold text-neutral-400 block">Comment:</span>
+                <textarea
+                  value={feedbackComment}
+                  onChange={(e) => setFeedbackComment(e.target.value)}
+                  placeholder="Defend your resume, leave feedback, or express your grievances..."
+                  rows={4}
+                  className="w-full p-3 bg-neutral-900 border border-neutral-800 rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-accent placeholder:text-neutral-500 resize-none"
+                />
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleCloseFeedback}
+                  className="flex-1 py-3 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  Skip & Exit
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingFeedback}
+                  className="flex-1 py-3 bg-[#C66A3D] hover:bg-[#C66A3D]/90 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmittingFeedback ? 'Sending...' : 'Submit & Exit'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

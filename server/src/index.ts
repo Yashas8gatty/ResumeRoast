@@ -832,6 +832,21 @@ app.get('/api/user/history', async (req: express.Request, res: express.Response)
   }
 });
 
+// Send User Feedback to Discord (Directly to Discord Webhook, bypasses Supabase)
+app.post('/api/feedback', async (req: express.Request, res: express.Response) => {
+  try {
+    const { rating, comment, email, name } = req.body;
+    const stars = '⭐'.repeat(rating || 5);
+    const message = `💬 **New User Feedback!**\n👤 Name: **${name || 'Anonymous'}**\n📧 Email: **${email || 'Anonymous'}**\n⭐ Rating: ${stars} (${rating}/5)\n📝 Comment: "${comment || 'No comment'}"`;
+    
+    await sendDiscordNotification(message);
+    res.status(200).json({ success: true });
+  } catch (error: any) {
+    console.error('Error sending feedback to Discord:', error);
+    res.status(500).json({ error: error.message || 'Failed to send feedback' });
+  }
+});
+
 // Diagnostic DB check endpoint
 app.get('/api/test-db', async (_req: express.Request, res: express.Response) => {
   const diagnosticResults: any = {
@@ -899,3 +914,6 @@ app.get('/api/test-db', async (_req: express.Request, res: express.Response) => 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+// Trigger reload for new env vars
+
