@@ -189,7 +189,7 @@ function AppInner() {
     <div className="min-h-screen bg-bg selection:bg-accent/10 selection:text-accent flex flex-col">
 
       {/* Top Bar */}
-      <header className="w-full border-b border-neutral-200/60 bg-white/70 backdrop-blur-sm sticky top-0 z-50 flex-shrink-0">
+      <header className="w-full border-b border-neutral-200/60 bg-white/70 backdrop-blur-sm relative z-50 flex-shrink-0">
         {isMobile ? (
           /* 📱 Mobile Header (64px) */
           <div className="h-16 px-4 flex items-center justify-between relative">

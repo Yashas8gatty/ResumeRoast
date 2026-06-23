@@ -43,6 +43,23 @@ export const RoastCardModal: React.FC<RoastCardModalProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Helper for browser compatibility: older mobile browsers do not support ctx.roundRect
+    const safeRoundRect = (context: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) => {
+      if (typeof context.roundRect === 'function') {
+        context.roundRect(x, y, w, h, r);
+      } else {
+        context.moveTo(x + r, y);
+        context.lineTo(x + w - r, y);
+        context.quadraticCurveTo(x + w, y, x + w, y + r);
+        context.lineTo(x + w, y + h - r);
+        context.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        context.lineTo(x + r, y + h);
+        context.quadraticCurveTo(x, y + h, x, y + h - r);
+        context.lineTo(x, y + r);
+        context.quadraticCurveTo(x, y, x + r, y);
+      }
+    };
+
     // Set resolution (1200 x 630 px) for crisp social media sharing (OG) size
     canvas.width = 1200;
     canvas.height = 630;
@@ -217,7 +234,7 @@ export const RoastCardModal: React.FC<RoastCardModalProps> = ({
     ctx.strokeStyle = stampColor;
     ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.roundRect(-90, -30, 180, 60, 6);
+    safeRoundRect(ctx, -90, -30, 180, 60, 6);
     ctx.stroke();
 
     // Stamp background highlight
