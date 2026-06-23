@@ -171,6 +171,127 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ data, onResumeUpload }
       handleCloseFeedback();
     }
   };
+
+  const renderModals = () => {
+    return (
+      <>
+        <RoastCardModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          score={data.score}
+          quote={data.whatRecruitersThink.quote}
+          mood={getScoreVerdict(data.score).mood}
+          fixes={data.topFixes}
+          userName={user?.name || 'Anonymous'}
+        />
+
+        {showMockModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+            <div className="w-full max-w-md bg-[#111111] border-2 border-amber-500/50 rounded-2xl shadow-2xl p-6 text-center space-y-4">
+              <div className="w-16 h-16 bg-amber-500/10 border-2 border-amber-500 rounded-full flex items-center justify-center mx-auto">
+                <span className="text-3xl">⚠️</span>
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-black text-white uppercase tracking-tight">AI Offline / Fallback Active</h3>
+                <p className="text-[11px] text-neutral-400">
+                  We couldn't reach the Gemini AI server (keys missing or rate-limited).
+                </p>
+              </div>
+              <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-left">
+                <p className="text-[12px] text-neutral-300 leading-relaxed">
+                  Your resume was roasted using our **local heuristic engine** instead. It still evaluates your structure, contact details, and quantification, but the feedback will be slightly generic.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowMockModal(false)}
+                className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-[#111111] text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer"
+              >
+                Proceed to Roast
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showFeedbackModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+            <div className="w-full max-w-md bg-[#111111] border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden">
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-neutral-800 bg-[#151515] flex items-center justify-between">
+                <div className="text-left">
+                  <h3 className="text-md font-black text-white uppercase tracking-tight">Rate Your Experience</h3>
+                  <p className="text-[11px] text-neutral-400">Did the roast cause permanent emotional damage?</p>
+                </div>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleFeedbackSubmit} className="p-6 space-y-5">
+                {/* Star Rating select */}
+                <div className="space-y-2 text-left">
+                  <span className="text-xs font-bold text-neutral-400 block">Rating:</span>
+                  <div className="flex items-center justify-center gap-3 py-3 bg-neutral-900/60 rounded-xl border border-neutral-800/80">
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const ratingLabels = ['Soft 😐', 'Mild 🙄', 'Painful 😭', 'Severe 💀', 'Brutal 🔥'];
+                      const isSelected = feedbackRating >= star;
+                      return (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setFeedbackRating(star)}
+                          className="group flex flex-col items-center gap-1 focus:outline-none cursor-pointer min-w-[50px]"
+                        >
+                          <Star
+                            className={`w-6 h-6 transition-all ${
+                              isSelected ? 'fill-accent text-accent scale-110' : 'text-neutral-600 group-hover:text-neutral-400'
+                            }`}
+                          />
+                          {feedbackRating === star && (
+                            <span className="text-[8px] font-black uppercase text-accent tracking-wider animate-in fade-in zoom-in-50 duration-200 block text-center">
+                              {ratingLabels[star - 1]}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Comment text area */}
+                <div className="space-y-1.5 text-left">
+                  <span className="text-xs font-bold text-neutral-400 block">Comment:</span>
+                  <textarea
+                    value={feedbackComment}
+                    onChange={(e) => setFeedbackComment(e.target.value)}
+                    placeholder="Defend your resume, leave feedback, or express your grievances..."
+                    rows={4}
+                    className="w-full p-3 bg-neutral-900 border border-neutral-800 rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-accent placeholder:text-neutral-500 resize-none"
+                  />
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleCloseFeedback}
+                    className="flex-1 py-3 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                  >
+                    Skip & Exit
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingFeedback}
+                    className="flex-1 py-3 bg-[#C66A3D] hover:bg-[#C66A3D]/90 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {isSubmittingFeedback ? 'Sending...' : 'Submit & Exit'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
   const sectionsList = ['Summary', 'Skills', 'Projects', 'Experience', 'Achievements', 'Verdict'];
 
   const renderReactionBadge = (severity: 'SEVERE' | 'MODERATE' | 'PRAISE') => {
@@ -1444,6 +1565,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ data, onResumeUpload }
 
             </div>
           )}
+          {renderModals()}
         </div>
       </div>
     );
@@ -2586,119 +2708,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ data, onResumeUpload }
         )}
       </AnimatePresence>
 
-      <RoastCardModal
-        isOpen={isShareModalOpen}
-        onClose={() => setIsShareModalOpen(false)}
-        score={data.score}
-        quote={data.whatRecruitersThink.quote}
-        mood={getScoreVerdict(data.score).mood}
-        fixes={data.topFixes}
-        userName={user?.name || 'Anonymous'}
-      />
-
-      {showMockModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#111111] border-2 border-amber-500/50 rounded-2xl shadow-2xl p-6 text-center space-y-4">
-            <div className="w-16 h-16 bg-amber-500/10 border-2 border-amber-500 rounded-full flex items-center justify-center mx-auto">
-              <span className="text-3xl">⚠️</span>
-            </div>
-            <div className="space-y-1.5">
-              <h3 className="text-lg font-black text-white uppercase tracking-tight">AI Offline / Fallback Active</h3>
-              <p className="text-xs text-neutral-400">
-                We couldn't reach the Gemini AI server (keys missing or rate-limited).
-              </p>
-            </div>
-            <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-left">
-              <p className="text-xs text-neutral-300 leading-relaxed">
-                Your resume was roasted using our **local heuristic engine** instead. It still evaluates your structure, contact details, and quantification, but the feedback will be slightly generic.
-              </p>
-            </div>
-            <button
-              onClick={() => setShowMockModal(false)}
-              className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-[#111111] text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer"
-            >
-              Proceed to Roast
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showFeedbackModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#111111] border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-neutral-800 bg-[#151515] flex items-center justify-between">
-              <div className="text-left">
-                <h3 className="text-md font-black text-white uppercase tracking-tight">Rate Your Experience</h3>
-                <p className="text-[11px] text-neutral-400">Did the roast cause permanent emotional damage?</p>
-              </div>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleFeedbackSubmit} className="p-6 space-y-5">
-              {/* Star Rating select */}
-              <div className="space-y-2 text-left">
-                <span className="text-xs font-bold text-neutral-400 block">Rating:</span>
-                <div className="flex items-center justify-center gap-3 py-3 bg-neutral-900/60 rounded-xl border border-neutral-800/80">
-                  {[1, 2, 3, 4, 5].map((star) => {
-                    const ratingLabels = ['Soft 😐', 'Mild 🙄', 'Painful 😭', 'Severe 💀', 'Brutal 🔥'];
-                    const isSelected = feedbackRating >= star;
-                    return (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setFeedbackRating(star)}
-                        className="group flex flex-col items-center gap-1 focus:outline-none cursor-pointer min-w-[50px]"
-                      >
-                        <Star
-                          className={`w-6 h-6 transition-all ${
-                            isSelected ? 'fill-accent text-accent scale-110' : 'text-neutral-600 group-hover:text-neutral-400'
-                          }`}
-                        />
-                        {feedbackRating === star && (
-                          <span className="text-[8px] font-black uppercase text-accent tracking-wider animate-in fade-in zoom-in-50 duration-200 block text-center">
-                            {ratingLabels[star - 1]}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Comment text area */}
-              <div className="space-y-1.5 text-left">
-                <span className="text-xs font-bold text-neutral-400 block">Comment:</span>
-                <textarea
-                  value={feedbackComment}
-                  onChange={(e) => setFeedbackComment(e.target.value)}
-                  placeholder="Defend your resume, leave feedback, or express your grievances..."
-                  rows={4}
-                  className="w-full p-3 bg-neutral-900 border border-neutral-800 rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-accent placeholder:text-neutral-500 resize-none"
-                />
-              </div>
-
-              {/* Action buttons */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleCloseFeedback}
-                  className="flex-1 py-3 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
-                >
-                  Skip & Exit
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingFeedback}
-                  className="flex-1 py-3 bg-[#C66A3D] hover:bg-[#C66A3D]/90 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  {isSubmittingFeedback ? 'Sending...' : 'Submit & Exit'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {renderModals()}
     </div>
   );
 };
