@@ -349,9 +349,15 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ data, onResumeUpload }
     const text = (data.resumeText || '').toLowerCase();
     const hasHighRank = /\b(1st|2nd|3rd|first|second|third|winner|won|champion|gold\s+medal|silver\s+medal|bronze\s+medal|rank\b|placement|rank\s*:\s*\d+)\b/i.test(text);
     const hasRunnerUp = /\b(runner-up|runner\s+up|runners-up|runners\s+up|runnerup|runnerups)\b/i.test(text);
+    const hasPublications = /\b(published|publication|publications|patent|patents|journal|conference|ieee|acm)\b/i.test(text);
+    const hasHighValueCert = /\b(aws\s+(solutions\s+architect|developer|sysops|security|practitioner)|gcp\s+(professional|architect|developer)|azure\s+(solutions\s+architect|administrator|security|fundamentals)|kubernetes\s+(certified|cka|ckad|cks)|oscp|cissp|ccna|ccie|rhcsa|rhce)\b/i.test(text);
 
-    if (hasHighRank || hasRunnerUp) {
+    if (hasHighRank || hasRunnerUp || hasPublications) {
       return 'PRAISE';
+    }
+
+    if (hasHighValueCert) {
+      return 'MODERATE';
     }
 
     if (data.score < 60) return 'SEVERE';

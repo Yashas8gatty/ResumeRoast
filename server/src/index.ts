@@ -152,6 +152,12 @@ function calculateDynamicScore(resumeText: string, bullets: string[], foundSkill
     score += 8;
   }
 
+  // 9. Certifications & Publications check
+  const hasPublications = /\b(published|publication|publications|patent|patents|journal|conference|ieee|acm)\b/i.test(textLower);
+  const hasHighValueCert = /\b(aws\s+(solutions\s+architect|developer|sysops|security|practitioner)|gcp\s+(professional|architect|developer)|azure\s+(solutions\s+architect|administrator|security|fundamentals)|kubernetes\s+(certified|cka|ckad|cks)|oscp|cissp|ccna|ccie|rhcsa|rhce)\b/i.test(textLower);
+  if (hasPublications) score += 6;
+  if (hasHighValueCert) score += 4;
+
   return Math.max(38, Math.min(score, 94));
 }
 
@@ -477,8 +483,13 @@ app.post('/api/roast', upload.single('resume'), async (req: express.Request, res
       isRoastGenerated = true;
     }
 
+    const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+    const currentYear = new Date().getFullYear();
+
     // Create system instruction for OpenAI
     const systemPrompt = `You are "Resume Roast", a savage, cynical, dark-humored, and highly opinionated resume reviewer who roasts resumes with zero sugar-coating and absolutely zero empathy. Your tone is extremely brutal, mockingly sarcastic, and contains 100% pure unfiltered violence. You are a seasoned recruiter who is utterly exhausted by lazy candidates and hates clichés. You do not hold back—your goal is to mock the candidate's life choices and crush their ego. Do NOT try to be constructive, helpful, or act like a mentor/HR manager. Do NOT give polite career suggestions or advice. Your job is to point out their incompetence and laugh at their failures in a sharp, witty, and devastating way. 
+
+IMPORTANT TEMPORAL CONTEXT: The current date is ${currentDate} (year ${currentYear}). Any resume dates up to the current date are valid past or present dates, NOT future dates. Do NOT mock the candidate for time-travel or listing future dates unless it is for employment. Future expected graduation or study dates are completely normal and should NOT be mocked as time-travel.
 
 CRITICAL CONCISENESS RULES:
 All critiques, quotes, descriptions, and comments MUST be extremely short, sharp, and direct. Use maximum 10-15 words for any single critique, comment, or quote. Cut out any preambles, greetings, or filler words. Every word must hurt, and every response must be brief.
@@ -507,14 +518,14 @@ Never force positivity. Never roast good content.
 ROAST FORMAT FOR WEAK/MODERATE ITEMS:
 If a section or item is weak/moderate, write ONLY a single, extremely brutal, cynical, and sarcastic roast criticizing it. Do NOT include any prefixes, labels, or sections like "🔥 Recruiter Reaction", "Problem:", "Example:", "Impact:", or "Fix:". Simply output the direct, savage roast text. Keep it under 15 words.
 
-Example of weak critique format:
-"This summary is pure junior-level fluff that says absolutely nothing of value."
+Example of weak critique format style (do NOT use this exact wording, generate a custom roast tailored specifically to the candidate's content):
+"This summary reads like a corporate buzzword generator had a nervous breakdown."
 
 APPRECIATION FORMAT FOR STRONG ITEMS:
 If a section or item is genuinely strong, write a single positive reaction explaining why. Do NOT include any prefixes, labels, or sections. Keep it under 12 words.
 
-Example of strong critique format:
-"Good use of measurable outcomes. Instantly builds recruiter trust."
+Example of strong critique format style (do NOT use this exact wording, write a custom evaluation tailored to the candidate's actual achievement):
+"Excellent metrics-backed description that immediately proves project scale."
 
 Analyze the provided resume text and generate a structured JSON roast. You MUST return ONLY a JSON object that adheres strictly to the following TypeScript interface:
 
@@ -669,7 +680,12 @@ app.post('/api/chat', async (req: express.Request, res: express.Response) => {
       return;
     }
 
+    const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+    const currentYear = new Date().getFullYear();
+
     const systemInstruction = `You are "Resume Roast Recruiter", the same brutally honest, dry, and sarcastic AI recruiter who previously roasted this candidate's resume. 
+
+IMPORTANT TEMPORAL CONTEXT: The current date is ${currentDate} (year ${currentYear}). Any resume dates up to ${currentDate} (e.g., in 2026 or earlier) are valid past or present dates, NOT future dates. Future expected graduation or study dates are completely normal and should NOT be mocked as time-travel.
 
 Here is the raw text of their resume for context:
 ---
