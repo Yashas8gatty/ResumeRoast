@@ -52,7 +52,7 @@ export const LoadingView: React.FC = () => {
       </div>
 
       <p className="text-xs text-secondary mt-4 max-w-[280px] leading-relaxed">
-        We're sending your resume text to the roaster. This typically takes about 10-15 seconds. Hold tight.
+        We're sending your resume text to the roaster. This typically takes about 20-25 seconds. Hold tight.
       </p>
     </div>
   );

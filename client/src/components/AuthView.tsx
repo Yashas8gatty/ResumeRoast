@@ -45,7 +45,7 @@ export function AuthView() {
 
       {/* LEFT COLUMN: Informative Panel (Promo & Live Roast Mockup) */}
       <div className="hidden lg:flex lg:col-span-7 flex-col justify-between p-8 xl:p-12 bg-neutral-50/40 relative overflow-hidden border-r border-neutral-200/50 h-full">
-        
+
         {/* Brand & Headline container */}
         <div className="space-y-4">
           {/* Brand Badge */}
@@ -71,7 +71,7 @@ export function AuthView() {
         {/* Live Roast Interactive Mockup */}
         <div className="bg-white rounded-2xl border border-neutral-200 shadow-md p-4 xl:p-5 max-w-md relative overflow-hidden my-4 group hover:shadow-lg transition-all duration-300">
           <div className="absolute -top-10 -right-10 w-24 h-24 bg-accent/5 rounded-full blur-xl group-hover:bg-accent/10 transition-colors" />
-          
+
           <div className="flex items-center justify-between border-b border-neutral-100 pb-2 mb-3">
             <div className="flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-accent" />
@@ -107,7 +107,7 @@ export function AuthView() {
                 Responsible for writing Jest unit tests for frontend components.
               </p>
             </div>
-            
+
             {/* Arrow */}
             <div className="flex justify-center -my-0.5">
               <span className="text-accent text-[10px] font-bold bg-white px-1.5 rounded-full border border-neutral-100 shadow-xs">↓ Improved by AI</span>
@@ -177,7 +177,7 @@ export function AuthView() {
 
       {/* RIGHT COLUMN: Authentication Form (Modal Card) */}
       <div className="col-span-1 lg:col-span-5 flex flex-col justify-center items-center px-4 sm:px-12 py-6 bg-white relative z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.015)] h-full overflow-y-auto">
-        
+
         {/* Mobile-Only Header Brand logo */}
         <div className="lg:hidden mb-4 flex flex-col items-center select-none">
           <img src="/rr_logo.png" alt="Resume Roast" className="h-24 w-auto" />
@@ -192,7 +192,7 @@ export function AuthView() {
             {/* Header */}
             <div className="mb-5 text-center">
               <h1 className="text-xl sm:text-2xl font-black text-primary mb-1 tracking-tight font-heading">
-                {mode === 'login' ? 'Welcome back 👋' : 'Get Roasted 🔥'}
+                {mode === 'login' ? 'Welcome back' : 'Get Roasted '}
               </h1>
               <p className="text-xs text-secondary font-medium">
                 {mode === 'login'
@@ -279,7 +279,7 @@ export function AuthView() {
                 {loading ? (
                   <><Loader2 className="w-3.5 h-3.5 animate-spin" /> {mode === 'login' ? 'Logging in…' : 'Creating account…'}</>
                 ) : (
-                  mode === 'login' ? '🔓 Log In to Account' : '🔥 Create Free Account'
+                  mode === 'login' ? ' Log In to Account' : 'Create Free Account'
                 )}
               </button>
             </form>
@@ -302,7 +302,7 @@ export function AuthView() {
               onClick={switchMode}
               className="w-full py-2.5 rounded-xl border border-neutral-200 text-[10px] font-black text-primary hover:bg-neutral-50 hover:border-neutral-300 transition-all duration-150 cursor-pointer shadow-subtle"
             >
-              {mode === 'login' ? '✨ Sign Up & Get Roasted' : '← Back to Login'}
+              {mode === 'login' ? ' Sign Up & Get Roasted' : '← Back to Login'}
             </button>
           </div>
 
